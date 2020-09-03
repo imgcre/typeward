@@ -1,4 +1,5 @@
 const { 
+  disableEsLint,
   override,
   addWebpackAlias,
   addBabelPlugin,
@@ -10,14 +11,16 @@ const path =require('path');
 
 module.exports = {
   webpack: override(
-    fixBabelImports('import', {
-      libraryName: '@material-ui/core',
-      libraryDirectory: 'esm',
-      camel2DashComponentName: false,
-    }),
+    disableEsLint(),
+    // fixBabelImports('import', {
+    //   libraryName: '@material-ui/core',
+    //   libraryDirectory: 'es',
+    //   camel2DashComponentName: false,
+    // }),
     addBabelPlugin('react-hot-loader/babel'),
     addWebpackAlias({
       '@': path.resolve(__dirname, './src'),
+      //'react-dom': process.env.NODE_ENV === 'production' ? 'react-dom' : '@hot-loader/react-dom',
     }),
     addWebpackPlugin(
       new ProgressBarPlugin(),

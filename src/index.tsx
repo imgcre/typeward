@@ -1,12 +1,17 @@
+import { hot } from 'react-hot-loader/root'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import 'fontsource-roboto';
+
+const WithHotReload = process.env.NODE_ENV === 'production' ? App : hot(App);
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <WithHotReload />
   </React.StrictMode>,
   document.getElementById('root')
 );
