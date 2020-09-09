@@ -7,6 +7,8 @@ export class Device {
   @observable batteryVoltage?: number;
   @observable signined = false;
   @observable acceleration?: {x: number, y: number, z: number};
+  @observable temperature?: number;
+
 
   constructor(public id: number) {
     autorun(() => {
@@ -30,6 +32,14 @@ export class Device {
         });
       }
     });
+
+    autorun(() => {
+      if(this.temperature) {
+        console.log(this.id, {
+          temp: this.temperature,
+        });
+      }
+    })
   }
 }
 
@@ -49,6 +59,10 @@ export default class Store {
 
     client.on('acceleration', action((deviceId, x, y, z) => {
       this.getOrCreate(deviceId).acceleration = {x, y, z};
+    }));
+
+    client.on('temperature', action((deviceId, temp) => {
+      this.getOrCreate(deviceId).temperature = temp;
     }));
   }
 

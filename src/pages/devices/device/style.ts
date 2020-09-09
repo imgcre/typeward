@@ -6,5 +6,8 @@ export default (theme: Theme) => createStyles({
   },
   canvas: {
     minWidth: '100%',
-  }
+  },
+  icon: {
+    transform: 'rotate(90deg) scale(2)',
+  },
 });

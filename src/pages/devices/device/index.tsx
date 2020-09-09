@@ -3,14 +3,15 @@ import { Grow, Card, CardActionArea, Grid, Typography, withStyles, WithStyles } 
 import { Device } from '../store';
 import { observer } from 'mobx-react';
 import style from './style';
-import three from 'three';
+import * as three from 'three';
+import { Battery20 } from '@material-ui/icons';
 
 type Props = Partial<WithStyles<typeof style>> & {
   device: Device
 };
 
-@observer
 @(withStyles(style) as any)
+@observer
 export default class extends Component<Props> {
   canvasRef = React.createRef<HTMLCanvasElement>();
 
@@ -89,13 +90,16 @@ export default class extends Component<Props> {
               {device.id}
             </Typography>
             <Typography variant='body2'>
-              电量值: {device.batteryVoltage}
+              <Battery20 className={classes?.icon}/>
             </Typography>
             <Typography variant='body2'>
               加速度: {acc != null ? `x: ${acc.x}, y: ${acc.y}, z: ${acc.z}` : '未获取'}
             </Typography>
             <Typography variant='body2'>
               {device.signined ? '已签到' : '未签到'}
+            </Typography>
+            <Typography variant='body2'>
+              温度值: {device.temperature}
             </Typography>
             <canvas width='150' ref={canvasRef}>
 

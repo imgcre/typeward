@@ -5,24 +5,27 @@ enum PayloadId {
   Signin = 1,
   BattetyVoltage = 2,
   Acceleration = 3,
+  Temperature = 4,
 }
 
 //mqtt.publish('imgcre/v1/233', '\x02\x00\03')
 //await mqtt.publish('imgcre/v1/233', '\x03\x00\x01\x00\x02\x00\x03')
 //mqtt.publish('imgcre/v1/233', '\x01')
 
-type Events = 'signin' | 'batteryVoltage' | 'acceleration';
+type Events = 'signin' | 'batteryVoltage' | 'acceleration' | 'temperature';
 
 type Callbacks = Pick<{
   'signin': (deviceId: Device['id']) => void,
   'batteryVoltage': (deviceId: Device['id'], voltage: number) => void,
   'acceleration': (deviceId: Device['id'], x: number, y: number, z: number) => void,
+  'temperature': (deviceId: Device['id'], temp: number) => void;
 }, Events>
 
 const payloadIds: Record<Events, number> = {
   signin: PayloadId.Signin,
   batteryVoltage: PayloadId.BattetyVoltage,
   acceleration: PayloadId.Acceleration,
+  temperature: PayloadId.Temperature,
 }
 
 class Queue {
@@ -59,6 +62,10 @@ class Queue {
   async popUShort(): Promise<number> {
     return (await this.pop(2)).readUInt16BE(0);
   }
+
+  async popShort(): Promise<number> {
+    return (await this.pop(2)).readInt16BE(0);
+  }
 }
 
 export default class {
@@ -72,8 +79,9 @@ export default class {
     //TODO: for debug
     (<any>window).mqtt = this.client;
 
-    await this.client.subscribe('imgcre/v1/+');
+    await this.client.subscribe('v1/+/+'); //批次
     console.debug('mqtt connected');
+
     this.client.on('message', (topic, msg) => {
       console.log({topic, msg});
       const [, , deviceIdStr] = topic.split('/');
@@ -99,16 +107,22 @@ export default class {
           this.callbacks[event]?.(deviceId);
           break;
         case 'batteryVoltage':
-          const voltage = await queue.popUShort()
+          let voltage = await queue.popUShort();
+          voltage = voltage / 4096 * 6;
           this.callbacks[event]?.(deviceId, voltage);
           break;
         case 'acceleration':
           let axises = [];
           for(let i = 0; i < 3; i++) {
-            axises.push(await queue.popUShort());
+            axises.push(await queue.popShort());
           }
           const [x, y, z] = axises;
           this.callbacks[event]?.(deviceId, x, y, z);
+          break;
+        case 'temperature':
+          let temp = await queue.popUShort();
+          temp = temp / 326.8 * 2;
+          this.callbacks[event]?.(deviceId, temp);
           break;
       }
     }

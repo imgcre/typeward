@@ -9,6 +9,9 @@ import DeviceComp from './device';
 
 const client = new Client();
 const store = new Store(client);
+
+(window as any).store = store;
+
 client.connect();
 
 @observer
