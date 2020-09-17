@@ -83,13 +83,13 @@ export default class {
     console.debug('mqtt connected');
 
     this.client.on('message', (topic, msg) => {
-      console.log({topic, msg});
+      //console.log({topic, msg});
       const [, , deviceIdStr] = topic.split('/');
       const deviceId = parseInt(deviceIdStr);
 
       const queue = this.queues[deviceId] ?? new Queue();
       if(!(deviceId in this.queues)) {
-        console.log('queue created');
+        //console.log('queue created');
         this.queues[deviceId] = queue;
         this.poll(deviceId, queue);
       }
@@ -98,7 +98,7 @@ export default class {
   }
 
   private async poll(deviceId: Device['id'], queue: Queue) {
-    console.log('poll', deviceId);
+    //console.log('poll', deviceId);
     while(true) {
       const payloadId = await queue.popByte();
       const event = <Events | undefined>Object.keys(payloadIds).find(key => payloadIds[<Events>key] === payloadId);

@@ -19,18 +19,20 @@
     "lodash": "^4.17.19",
     "mobx": "^5.15.4",
     "mobx-react": "^6.2.2",
-    "mqtt": "^4.1.0",
+    "mqtt": "^4.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "three": "^0.118.3",
+    "ts-node": "^9.0.0",
     "typescript": "^3.7.5"
   },
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
-    "test": "react-app-rewired test"
+    "test": "react-app-rewired test",
+    "serve": "ts-node ./scripts/logger.ts"
   },
   "eslintConfig": {
     "extends": "react-app"

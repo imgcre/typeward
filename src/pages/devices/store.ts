@@ -1,4 +1,4 @@
-import { observable, action, autorun } from 'mobx';
+import { observable, action, autorun, computed } from 'mobx';
 import MqttClient from './mqtt_client';
 import { pick } from 'lodash';
 //mqtt的逻辑先写到这里
@@ -8,6 +8,7 @@ export class Device {
   @observable signined = false;
   @observable acceleration?: {x: number, y: number, z: number};
   @observable temperature?: number;
+  @observable angleRef: {x: number, y: number} = {x: 0, y: 0};
 
 
   constructor(public id: number) {
@@ -40,6 +41,29 @@ export class Device {
         });
       }
     })
+
+
+  }
+
+  @computed get angleOri() {
+    const {x, y, z} = this.acceleration ?? {x: 0, y: 0, z: 1};
+    return {
+      x: Math.atan(x / z),
+      y: -Math.atan(y / z),
+    }
+  }
+
+  @computed get angle() {
+    const {x, y} = this.angleOri;
+    const {x: xRef, y: yRef} = this.angleRef;
+    return {
+      x: x - xRef,
+      y: y - yRef,
+    }
+  }
+
+  @action leveling() {
+    this.angleRef = this.angleOri;
   }
 }
 
@@ -58,7 +82,9 @@ export default class Store {
     }));
 
     client.on('acceleration', action((deviceId, x, y, z) => {
-      this.getOrCreate(deviceId).acceleration = {x, y, z};
+      let device = this.getOrCreate(deviceId);
+      device.acceleration = {x, y, z};
+    
     }));
 
     client.on('temperature', action((deviceId, temp) => {

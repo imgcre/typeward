@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Grow, Card, CardActionArea, Grid, Typography, withStyles, WithStyles } from '@material-ui/core';
+import { Grow, Card, CardActionArea, Grid, Typography, withStyles, WithStyles, Button } from '@material-ui/core';
 import { Device } from '../store';
 import { observer } from 'mobx-react';
 import style from './style';
 import * as three from 'three';
 import { Battery20 } from '@material-ui/icons';
+import { autorun } from 'mobx';
 
 type Props = Partial<WithStyles<typeof style>> & {
   device: Device
@@ -29,9 +30,9 @@ export default class extends Component<Props> {
       scene.fog = new three.Fog(0xffffff, 0.015, 100);
 
       const camera = new three.PerspectiveCamera(50, width / height, 0.1, 800);
-      camera.position.x = -15;
-      camera.position.y = 20;
-      camera.position.z = 15;
+      camera.position.x = -10;
+      camera.position.y = 12;
+      camera.position.z = 10;
       camera.lookAt(scene.position);
 
       const renderer = new three.WebGLRenderer({
@@ -50,7 +51,7 @@ export default class extends Component<Props> {
       spotLight.position.set(-40, 60, -10);
       scene.add(spotLight);
 
-      const cubeGeometry = new three.BoxGeometry(4, 4, 4);
+      const cubeGeometry = new three.BoxGeometry(6, 2, 4);
       const cubeMaterial = new three.MeshLambertMaterial({
         color: 0x808080,
       });
@@ -61,12 +62,26 @@ export default class extends Component<Props> {
 
       scene.add(cube);
 
+      // autorun(() => {
+      //   const {x, y} = this.props.device.angle;
+
+      //   scene.traverse(e => {
+      //     if(e instanceof three.Mesh) {
+      //       e.rotation.x = x;
+      //       e.rotation.y = 0;
+      //       e.rotation.z  = -y;
+      //     }
+      //   })
+      //   renderer.render(scene, camera);
+      // });
+
       const render = () => {
+        const {x, y} = this.props.device.angle;
         scene.traverse(e => {
           if(e instanceof three.Mesh) {
-            e.rotation.x += 0.01;
-            e.rotation.y += 0.01;
-            e.rotation.z += 0.01;
+            e.rotation.x = x;
+            e.rotation.y = 0;
+            e.rotation.z  = y;
           }
         })
         requestAnimationFrame(render);
@@ -81,29 +96,41 @@ export default class extends Component<Props> {
   render() {
     const { canvasRef } = this;
     const { device, classes } = this.props;
-    const { acceleration: acc } = device;
+    const { acceleration: acc, batteryVoltage } = device;
+
     return (
       <Grow in>
         <Card>
+          
           <CardActionArea className={classes?.card}>
-            <Typography variant='h5'>
-              {device.id}
-            </Typography>
-            <Typography variant='body2'>
-              <Battery20 className={classes?.icon}/>
-            </Typography>
-            <Typography variant='body2'>
-              加速度: {acc != null ? `x: ${acc.x}, y: ${acc.y}, z: ${acc.z}` : '未获取'}
-            </Typography>
-            <Typography variant='body2'>
-              {device.signined ? '已签到' : '未签到'}
-            </Typography>
-            <Typography variant='body2'>
-              温度值: {device.temperature}
-            </Typography>
-            <canvas width='150' ref={canvasRef}>
+            <div className={classes?.content}>
+              <Button className={classes?.leveling} onClick={() => {
+                device.leveling();
+              }}>
+                复位
+              </Button>
 
-            </canvas>
+              <Typography variant='h5'>
+                {device.id}
+              </Typography>
+              <Typography variant='body2'>
+                电压: {batteryVoltage?.toFixed(2)}
+              </Typography>
+              {/* <Typography variant='body2'>
+                加速度: {acc != null ? `x: ${acc.x}, y: ${acc.y}, z: ${acc.z}` : '未获取'}
+              </Typography> */}
+              <Typography variant='body2'>
+                角度: X: {(180 / Math.PI * device.angle.x).toFixed(2)}°, Y: {(180 / Math.PI * device.angle.y).toFixed(2)}°
+              </Typography>
+              <Typography variant='body2'>
+                {device.signined ? '已签到' : '未签到'}
+              </Typography>
+              <Typography variant='body2'>
+                温度值: {device.temperature?.toFixed(2)}
+              </Typography>
+              <canvas width='150' ref={canvasRef} />
+            </div>
+            
           </CardActionArea>
         </Card>
       </Grow>

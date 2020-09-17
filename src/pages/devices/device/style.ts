@@ -10,4 +10,12 @@ export default (theme: Theme) => createStyles({
   icon: {
     transform: 'rotate(90deg) scale(2)',
   },
+  content: {
+    position: 'relative',
+  },
+  leveling: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
 });
